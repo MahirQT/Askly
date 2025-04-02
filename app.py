@@ -4,7 +4,7 @@ from datetime import datetime
 from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
 from flask_sqlalchemy import SQLAlchemy
 import bcrypt
-import openai
+from openai import OpenAI
 from werkzeug.utils import secure_filename
 from functools import wraps
 from dotenv import load_dotenv
@@ -13,6 +13,7 @@ load_dotenv()
 
 # Initialize Flask app
 app = Flask(__name__)
+
 
 # Configuration
 app.config['SECRET_KEY'] = os.getenv('FLASK_SECRET_KEY', 'default-secret-key-for-dev')
@@ -24,7 +25,7 @@ app.config['OPENAI_API_KEY'] = os.getenv('OPENAI_API_KEY')  # From .env file
 
 # Initialize extensions
 db = SQLAlchemy(app)
-openai.api_key = app.config['OPENAI_API_KEY']
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 # Create upload folder if not exists
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
@@ -401,63 +402,35 @@ def dobby():
 @app.route('/ask_dobby', methods=['POST'])
 @login_required
 def ask_dobby():
-    if session['role'] != 'student':
-        return jsonify({'response': 'Dobby only helps students!', 'status': 'error'}), 403
-    
-    user_message = request.json.get('message')
-    
-    if not user_message or not isinstance(user_message, str):
-        return jsonify({'response': 'Please provide a valid question', 'status': 'error'}), 400
-    
     try:
-        # Check if API key is configured
-        if not app.config['OPENAI_API_KEY']:
-            return jsonify({
-                'response': 'Dobby is not properly configured. Please contact support.',
-                'status': 'error'
-            }), 500
-        
-        response = openai.ChatCompletion.create(
+        response = client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[
-                {
-                    "role": "system", 
-                    "content": """You are Dobby, a friendly AI doubt solver for students. 
-                                Provide clear, concise explanations. Break down complex concepts. 
-                                Be encouraging and helpful. If you don't know something, say so honestly."""
-                },
-                {"role": "user", "content": user_message}
+                {"role": "system", "content": "You are Dobby..."},
+                {"role": "user", "content": request.json.get('message')}
             ],
             temperature=0.7,
             max_tokens=500
         )
-        
         return jsonify({
             'response': response.choices[0].message.content,
             'status': 'success'
         })
-        
-    except openai.error.AuthenticationError:
-        return jsonify({
-            'response': 'Authentication failed. Please contact support.',
-            'status': 'error'
-        }), 500
-    except openai.error.RateLimitError:
-        return jsonify({
-            'response': 'Dobby is getting too many requests. Please try again later.',
-            'status': 'error'
-        }), 429
-    except openai.error.InvalidRequestError as e:
-        return jsonify({
-            'response': f'Invalid request: {str(e)}',
-            'status': 'error'
-        }), 400
     except Exception as e:
-        app.logger.error(f"Dobby error: {str(e)}")
-        return jsonify({
-            'response': 'Oops! Dobby encountered an unexpected issue.',
-            'status': 'error'
-        }), 500
+        return jsonify({'response': str(e), 'status': 'error'}), 500
+    
+@app.route('/test_openai')
+def test_openai():
+    try:
+        test = client.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=[{"role": "user", "content": "Say 'test successful'"}]
+        )
+        return f"Success! Response: {test.choices[0].message.content}"
+    except Exception as e:
+        return f"Failed: {str(e)}"
+    
+    
 
 # Initialize database
 with app.app_context():
