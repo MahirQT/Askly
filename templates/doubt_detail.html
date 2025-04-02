@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block title %}{{ doubt.title }}{% endblock %}
+
+{% block content %}
+<div class="doubt-detail">
+    <h2>{{ doubt.title }}</h2>
+    <div class="doubt-content">
+        <p>{{ doubt.description }}</p>
+        {% if doubt.image_path %}
+        <img src="{{ url_for('static', filename='uploads/' + doubt.image_path) }}" alt="Doubt image" width="500px" height="500px">
+        {% endif %}
+        <p class="meta">Posted by {{ doubt.author.name }} on {{ doubt.created_at.strftime('%Y-%m-%d %H:%M') }}</p>
+    </div>
+    
+    {% if doubt.solved %}
+    <div class="solution">
+        <h3>Solution</h3>
+        <p>{{ doubt.solutions[0].text }}</p>
+        {% if doubt.solutions[0].image_path %}
+        <img src="{{ url_for('static', filename='uploads/' + doubt.solutions[0].image_path) }}" alt="Solution image" width="500px" height="500px">
+        {% endif %}
+        {% if doubt.solutions[0].explanation %}
+        {% endif %}
+        <p class="verified"> ✅ Verified by {{ doubt.solutions[0].solved_by }} ({{ doubt.solutions[0].solver_role }})</p>
+        
+        <!-- Voting Section -->
+        <div class="voting">
+            <span>Was this helpful?</span>
+            {% set user_vote = doubt.solutions[0].votes|selectattr('user_id', 'equalto', session['user_id'])|first %}
+            <a href="{{ url_for('vote', solution_id=doubt.solutions[0].id, vote_type='up') }}"
+               class="vote-btn {% if user_vote and user_vote.is_upvote %}active{% endif %}">
+                👍 {{ doubt.solutions[0].votes|selectattr('is_upvote')|list|count }}
+            </a>
+            <a href="{{ url_for('vote', solution_id=doubt.solutions[0].id, vote_type='down') }}"
+               class="vote-btn {% if user_vote and not user_vote.is_upvote %}active{% endif %}">
+                👎 {{ doubt.solutions[0].votes|rejectattr('is_upvote')|list|count }}
+            </a>
+        </div>
+    </div>
+    {% else %}
+    <p class="status">This doubt is still unsolved.</p>
+    {% endif %}
+    
+    <!-- Comment Section -->
+    <div class="comment-section">
+        <h3>Discussion</h3>
+        
+        {% for comment in doubt.comments %}
+        <div class="comment">
+            <div class="comment-header">
+                <strong>{{ comment.commenter.name }}</strong>
+                <span class="comment-time">{{ comment.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
+            </div>
+            <p>{{ comment.text }}</p>
+        </div>
+        {% endfor %}
+        
+        <form method="POST" action="{{ url_for('add_comment', doubt_id=doubt.id) }}">
+            <div class="form-group">
+                <textarea name="comment_text" placeholder="Add your comment..." required></textarea>
+            </div>
+            <button type="submit" class="btn">Post Comment</button>
+        </form>
+    </div>
+    <br>
+    <br>
+    <a href="{{ url_for('dashboard') }}" class="btn">Back to Dashboard</a>
+</div>
+{% endblock %}

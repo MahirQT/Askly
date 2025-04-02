@@ -1,0 +1,16 @@
+# Environment files
+.env
+*.env
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+venv/
+
+# Instance folders (Flask)
+instance/
+
+# IDE
+.vscode/
+.idea/
