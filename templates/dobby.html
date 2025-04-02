@@ -1,3 +1,4 @@
+<!-- <<<<<<< HEAD -->
 {% extends "base.html" %}
 
 {% block title %}Dobby - AI Assistant{% endblock %}
@@ -77,4 +78,85 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
+<!-- ======= -->
+{% extends "base.html" %}
+
+{% block title %}Dobby - AI Assistant{% endblock %}
+
+{% block content %}
+<div class="dobby-container">
+    <div class="dobby-header">
+        <img src="{{ url_for('static', filename='dobby.png') }}" alt="Dobby" class="dobby-avatar">
+        <h2>Dobby - Your AI Doubt Solver</h2>
+    </div>
+    
+    <div class="chat-container">
+        <div id="chat-messages" class="chat-messages">
+            <div class="message dobby">
+                <div class="message-sender">Dobby</div>
+                <div class="message-content">Hello! I'm Dobby, your AI doubt solver. How can I help you today?</div>
+            </div>
+        </div>
+        
+        <div class="chat-input">
+            <textarea id="user-message" placeholder="Ask Dobby anything..."></textarea>
+            <button id="send-btn" class="btn">Ask Dobby</button>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const chatMessages = document.getElementById('chat-messages');
+    const userInput = document.getElementById('user-message');
+    const sendBtn = document.getElementById('send-btn');
+    
+    function addMessage(sender, message) {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message ${sender}`;
+        messageDiv.innerHTML = `
+            <div class="message-sender">${sender === 'user' ? 'You' : 'Dobby'}</div>
+            <div class="message-content">${message}</div>
+        `;
+        chatMessages.appendChild(messageDiv);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+    
+    sendBtn.addEventListener('click', async function() {
+        const message = userInput.value.trim();
+        if (!message) return;
+        
+        addMessage('user', message);
+        userInput.value = '';
+        
+        try {
+            const response = await fetch('/ask_dobby', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ message: message })
+            });
+            
+            const data = await response.json();
+            if (data.status === 'success') {
+                addMessage('dobby', data.response);
+            } else {
+                addMessage('dobby', "Oops! Something went wrong. Please try again.");
+            }
+        } catch (error) {
+            addMessage('dobby', "Dobby is having trouble connecting. Please try again later.");
+        }
+    });
+    
+    // Allow Enter key to send message
+    userInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            sendBtn.click();
+        }
+    });
+});
+</script>
+<!-- >>>>>>> a96fda2eaa1b4fa2f14a7eb06eb200e5ee09b3c5 -->
 {% endblock %}

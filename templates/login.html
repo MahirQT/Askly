@@ -1,3 +1,4 @@
+<!-- <<<<<<< HEAD -->
 {% extends "base.html" %}
 
 {% block title %}Login{% endblock %}
@@ -24,3 +25,31 @@
 <br>
 <p class="detail"><span style="color: #8F4AA8; font-size: 30px;"><b>Askly</b></span> is an interactive learning platform where <span style="color: #8F4AA8; font-size: 25px;">👨🏽‍🎓students</span> and <span style="color: #8F4AA8; font-size: 25px;">🧑🏽‍🏫 teachers</span> connect to solve academic doubts in real-time. With <b>AI-powered assistance</b>, verified solutions, and a vibrant community, Askly makes learning collaborative, efficient, and rewarding.</p>
 {% endblock %}
+<!-- ======= -->
+{% extends "base.html" %}
+
+{% block title %}Login{% endblock %}
+
+{% block content %}
+<!-- <h1>Welcome to Askly</h1> -->
+<img src="{{ url_for('static', filename='login.png') }}" alt="Dobby" class="login-avatar">
+
+<div class="form-container">
+    <h2>Login</h2><br>
+    <form method="POST" action="{{ url_for('login') }}">
+        <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" required>
+        </div>
+        <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" required>
+        </div>
+        <button type="submit" class="btn">Login</button>
+    </form>
+    <p>Don't have an account? <a href="{{ url_for('register') }}">Register here</a></p>
+</div>
+<br>
+<p class="detail"><span style="color: #8F4AA8; font-size: 30px;"><b>Askly</b></span> is an interactive learning platform where <span style="color: #8F4AA8; font-size: 25px;">👨🏽‍🎓students</span> and <span style="color: #8F4AA8; font-size: 25px;">🧑🏽‍🏫 teachers</span> connect to solve academic doubts in real-time. With <b>AI-powered assistance</b>, verified solutions, and a vibrant community, Askly makes learning collaborative, efficient, and rewarding.</p>
+{% endblock %}
+<!-- >>>>>>> a96fda2eaa1b4fa2f14a7eb06eb200e5ee09b3c5 -->

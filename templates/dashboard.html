@@ -1,3 +1,4 @@
+<!-- <<<<<<< HEAD, -->
 {% extends "base.html" %}
 
 {% block title %}Dashboard{% endblock %}
@@ -53,4 +54,61 @@
         {% endif %}
     </div>
 </div>
+<!-- ======= -->
+{% extends "base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <h1 class="welcome-header">Welcome, {{ name }}!</h1>
+    <img src="{{ url_for('static', filename='ask.png') }}" alt="ask-teacher" class="ask-teacher">
+    <div class="dobby-card">
+        <h3>Need quick help?</h3>
+        <p style="font-size: 20px;"> 🤖 Ask Dobby, our AI assistant, for instant answers</p>
+        <div class="btn-group">
+            <a href="{{ url_for('dobby') }}" class="btn">Ask Dobby</a>
+            <a href="{{ url_for('ask_doubt') }}" class="btn">Ask New Doubt</a>
+        </div>
+    </div>
+
+    <div class="doubts-section">
+        <h3 class="section-title">Your Recent Doubts</h3>
+        {% if user_doubts %}
+            {% for doubt in user_doubts %}
+            <div class="doubt-card {% if doubt.solved %}solved{% endif %}">
+                <h4>{{ doubt.title }}</h4>
+                <p>{{ doubt.description }}</p>
+                {% if doubt.image_path %}
+                <img src="{{ url_for('static', filename='uploads/' + doubt.image_path) }}" alt="Doubt image">
+                {% endif %}
+                <p class="meta">Posted on {{ doubt.created_at.strftime('%Y-%m-%d %H:%M') }}</p>
+                <a href="{{ url_for('doubt_detail', doubt_id=doubt.id) }}" class="btn">View Details</a>
+            </div>
+            {% endfor %}
+        {% else %}
+            <p class="empty-state">You haven't posted any doubts yet.</p>
+        {% endif %}
+    </div>
+
+    <div class="solved-section">
+        <h3 class="section-title">Solved Doubts</h3>
+        {% if solved_doubts %}
+            {% for doubt in solved_doubts %}
+            <div class="doubt-card solved">
+                <h4>{{ doubt.title }}</h4>
+                <p>Solution: {{ doubt.solutions[0].text }}</p>
+                <p class="verified">
+                    <span>✅</span>
+                    Verified by {{ doubt.solutions[0].solved_by }} ({{ doubt.solutions[0].solver_role }})
+                </p>
+                <a href="{{ url_for('doubt_detail', doubt_id=doubt.id) }}" class="btn">View Details</a>
+            </div>
+            {% endfor %}
+        {% else %}
+            <p class="empty-state">No solved doubts yet.</p>
+        {% endif %}
+    </div>
+</div>
+<!-- >>>>>>> a96fda2eaa1b4fa2f14a7eb06eb200e5ee09b3c5 -->
 {% endblock %}
