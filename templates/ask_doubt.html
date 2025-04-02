@@ -22,29 +22,4 @@
         <button type="submit" class="btn">Submit Doubt</button>
     </form>
 </div>
-<!-- ======= -->
-{% extends "base.html" %}
-
-{% block title %}Ask Doubt{% endblock %}
-
-{% block content %}
-<div class="form-container">
-    <h2>Ask a Doubt</h2>
-    <form method="POST" enctype="multipart/form-data">
-        <div class="form-group">
-            <label for="title">Title</label>
-            <input type="text" id="title" name="title" required>
-        </div>
-        <div class="form-group">
-            <label for="description">Description</label>
-            <textarea id="description" name="description" rows="5" required></textarea>
-        </div>
-        <div class="form-group">
-            <label for="image">Upload Image (optional)</label>
-            <input type="file" id="image" name="image" accept="image/*">
-        </div>
-        <button type="submit" class="btn">Submit Doubt</button>
-    </form>
-</div>
-<!-- >>>>>>> a96fda2eaa1b4fa2f14a7eb06eb200e5ee09b3c5 -->
 {% endblock %}
