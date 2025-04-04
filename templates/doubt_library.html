@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block title %}Doubt Library{% endblock %}
+
+{% block content %}
+<div class="library-container">
+    <h2>Doubt Library</h2>
+    <br>
+    
+    <!-- Search and Filter Section -->
+    <div class="filter-section">
+        <form method="GET" class="filter-form">
+            <div class="form-group">
+                <input type="text" name="search" placeholder="Search doubts..." value="{{ search_query }}">
+            </div>
+            <div class="form-group">
+                <select name="subject">
+                    <option value="">All Subjects</option>
+                    {% for subject in subjects %}
+                    <option value="{{ subject }}" {% if subject == current_subject %}selected{% endif %}>{{ subject }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button type="submit" class="btn">Filter</button>
+        </form>
+    </div>
+
+    <!-- Solved Doubts List -->
+    <div class="doubts-list">
+        {% for doubt in solved_doubts %}
+        <div class="doubt-card">
+            <div class="doubt-header">
+                <h3 style="color: #8F4AA8;">{{ doubt.title }}</h3>
+                <span class="subject-badge">{{ doubt.subject }}</span>
+            </div>
+            <p style="font-size: large;">{{ doubt.description }}</p><br>
+            <div class="doubt-meta">
+                <small>Posted by {{ doubt.author.name }} on {{ doubt.created_at.strftime('%d %b %Y') }}</small>
+            </div>
+            
+            <!-- Solutions -->
+            {% for solution in doubt.solutions %}
+            <div class="solution">
+                <div class="solution-header">
+                    <h4> ✅ Solution by {{ solution.solved_by }} ({{ solution.solver_role }})</h4>
+                    <div class="vote-count">
+                        <span class="upvotes">{{ solution.upvotes }} upvotes</span>
+                        <span class="downvotes">{{ solution.downvotes }} downvotes</span>
+                    </div>
+                </div>
+                <p>{{ solution.text }}</p>
+                {% if solution.image_path %}
+                <div class="solution-image">
+                    <img src="{{ url_for('static', filename='uploads/' + solution.image_path) }}" alt="Solution image">
+                </div>
+                {% endif %}
+                
+                <!-- Comments Section -->
+                <div class="comments-section">
+                    <h2>Comments</h2>
+                    {% for comment in doubt.comments %}
+                    <div class="comment">
+                        <p><strong>{{ comment.commenter.name }}:</strong> {{ comment.text }}</p>
+                        <small>{{ comment.created_at.strftime('%d %b %Y %H:%M') }}</small>
+                    </div>
+                    {% endfor %}
+                    
+                    <!-- Add Comment Form -->
+                    <form method="POST" action="{{ url_for('add_comment', doubt_id=doubt.id) }}" class="comment-form">
+                        <textarea name="comment_text" placeholder="Add a comment..." required></textarea>
+                        <button type="submit" class="btn">Post Comment</button>
+                    </form>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

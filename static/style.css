@@ -281,6 +281,68 @@
         text-align: center;
         padding: 1rem 0;
     }
+.subject-group {
+    margin-bottom: 2rem;
+}
+
+.subject-title {
+    color: #AA60C8;
+    font-size: 1.25rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #EABDE6;
+}
+
+/* Leaderboard styles (if you want to keep them) */
+.dashboard-row {
+    display: flex;
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.dashboard-card {
+    flex: 1;
+    background: white;
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.card-header {
+    color: white;
+    background-color: #AA60C8;
+    padding: 0.75rem 1rem;
+    margin: -1.5rem -1.5rem 1.5rem;
+    border-radius: 12px 12px 0 0;
+    font-weight: 600;
+}
+
+.ranking-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.ranking-name {
+    color: #333;
+}
+
+.ranking-value {
+    color: #AA60C8;
+    font-weight: 600;
+}
+
+@media (max-width: 768px) {
+    .dashboard-row {
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+    
+    .subject-title {
+        font-size: 1.1rem;
+    }
+}
     
     /* Responsive Design */
     @media (max-width: 768px) {
@@ -310,6 +372,7 @@
     
     .teacher-dashboard {
         display: flex;
+        border-radius: 16px;
         flex-direction: column;
         gap: 2rem;
         padding: 2rem;
@@ -338,7 +401,8 @@
     }
     
     .card-header {
-        color: #AA60C8;
+        color:  #ffffff;
+        background-color:#AA60C8 ;
         font-size: 1.25rem;
         margin-bottom: 1.5rem;
         padding-bottom: 0.75rem;
@@ -584,10 +648,10 @@
     }
     
     .status {
-        color: #AA60C8;
+        color: #401451;
         font-weight: 600;
         padding: 1rem;
-        background: #FFDFEF;
+        background: #ec74de;
         border-radius: 8px;
         text-align: center;
     }
@@ -724,6 +788,12 @@
         font-size: 20px;
     
     }
+    .form-container p a{
+        color: #AA60C8;
+        font-weight: 600;
+        text-decoration: none;
+    }
+
     @media (max-width: 768px) {
         .login-avatar {
             width: 300px;
@@ -957,3 +1027,256 @@
         }
     
     }
+
+    /* Doubt Library Styles */
+.library-container {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 20px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.library-container h2 {
+    color: #AA60C8;
+    text-align: center;
+    font-size: 2rem;
+    margin-bottom: 1rem;
+}
+
+/* Filter Section */
+.filter-section {
+    background-color: #FFDFEF;
+    padding: 1.5rem;
+    border-radius: 12px;
+    margin-bottom: 2rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.filter-form {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.form-group {
+    flex: 1;
+    min-width: 200px;
+}
+
+.filter-form input[type="text"],
+.filter-form select {
+    width: 100%;
+    padding: 0.75rem;
+    border: 2px solid #EABDE6;
+    border-radius: 8px;
+    font-size: 1rem;
+    background-color: white;
+}
+
+.filter-form input[type="text"]:focus,
+.filter-form select:focus {
+    outline: none;
+    border-color: #AA60C8;
+}
+
+.filter-form button {
+    background-color: #AA60C8;
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s;
+}
+
+.filter-form button:hover {
+    background-color: #8F4AA8;
+    transform: translateY(-2px);
+}
+
+/* Doubts List */
+.doubts-list {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.doubt-card {
+    background-color: #FFDFEF;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    border-left: 4px solid #D69ADE;
+}
+
+
+.doubt-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.doubt-header h3 {
+    color: #333;
+    margin: 0;
+}
+
+.subject-badge {
+    background-color: #EABDE6;
+    color: #5A2D6E;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.doubt-meta small {
+    color: #666;
+    font-size: 0.9rem;
+}
+
+/* Solution Styling */
+.solution {
+    background-color: #ffffff;
+    border-radius: 8px;
+    padding: 1.25rem;
+    margin-top: 1.5rem;
+}
+
+.solution-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.solution-header h4 {
+    color: #1f7707;
+    margin: 0;
+}
+
+.vote-count {
+    display: flex;
+    gap: 1rem;
+}
+
+.upvotes {
+    color: #4CAF50;
+    font-weight: 600;
+}
+
+.downvotes {
+    color: #F44336;
+    font-weight: 600;
+}
+
+.solution-image {
+    /* position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 10px 10px 10px 10px; */
+    text-align: center;
+}
+
+.solution-image img {
+    position: relative;
+    left: -150px;
+
+    max-width: 100%;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+/* Comments Section */
+.comments-section {
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #EABDE6;
+}
+
+.comments-section h5 {
+    color: #5A2D6E;
+    margin-bottom: 1rem;
+}
+
+.comment {
+    background-color: #eae9e9;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+}
+
+.comment p {
+    margin: 0.25rem 0;
+}
+
+.comment small {
+    color: #888;
+    font-size: 0.8rem;
+}
+
+.comment-form {
+    margin-top: 1.5rem;
+}
+
+.comment-form textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 2px solid #EABDE6;
+    border-radius: 8px;
+    min-height: 100px;
+    margin-bottom: 0.75rem;
+    font-family: inherit;
+}
+
+.comment-form textarea:focus {
+    outline: none;
+    border-color: #AA60C8;
+}
+
+.comment-form .btn {
+    background-color: #AA60C8;
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s;
+}
+
+.comment-form .btn:hover {
+    background-color: #8F4AA8;
+    transform: translateY(-2px);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .filter-form {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .solution-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+    
+    .vote-count {
+        align-self: flex-end;
+    }
+    .solution-image img {
+        position: relative;
+        left: -200px;
+    
+        max-width: 100%;
+        border-radius: 8px;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+    
+}

@@ -5,24 +5,20 @@
 
 {% block content %}
 <div class="teacher-dashboard">
-    <h2>🤔Unsolved Doubts</h2>
-    
-    {% if doubts %}
-    <div class="doubt-list">
-        {% for doubt in doubts %}
-        <div class="dashboard-card">
-            <h3>{{ doubt.title }}</h3>
+    <!-- <h2>Unsolved Doubts</h2> -->
+    <h2 class="section-title">🤔Unsolved Doubts</h2>
+    {% if unsolved_doubts %}
+        {% for doubt in unsolved_doubts %}
+        <div class="doubt-card">
+            <h4>{{ doubt.title }}</h4>
+            <p><strong>Subject:</strong> {{ doubt.subject }}</p>
             <p>{{ doubt.description }}</p>
-            {% if doubt.image_path %}
-            <img src="{{ url_for('static', filename='uploads/' + doubt.image_path) }}" alt="Doubt image">
-            {% endif %}
             <p class="meta">Posted by {{ doubt.author.name }} on {{ doubt.created_at.strftime('%Y-%m-%d %H:%M') }}</p>
-            <a href="{{ url_for('solve_doubt', doubt_id=doubt.id) }}" class="redeem-btn">Solve This Doubt</a>
+            <a href="{{ url_for('solve_doubt', doubt_id=doubt.id) }}" class="btn">Solve This Doubt</a>
         </div>
         {% endfor %}
-    </div>
     {% else %}
-    <p>No unsolved doubts at the moment.</p>
+        <p class="empty-state">No unsolved doubts at the moment.</p>
     {% endif %}
 
     <div class="dashboard-row">
@@ -39,7 +35,7 @@
 
         <!-- Top Teachers Card -->
         <div class="dashboard-card">
-            <div class="card-header">Top Teachers</div>
+            <div class="card-header">Top Teachers & Seniors</div>
             {% for teacher in top_teachers %}
             <div class="ranking-item">
                 <span class="ranking-name">{{ teacher.name }}</span>

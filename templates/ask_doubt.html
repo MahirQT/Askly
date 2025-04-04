@@ -1,4 +1,3 @@
-
 {% extends "base.html" %}
 
 {% block title %}Ask Doubt{% endblock %}
@@ -18,6 +17,15 @@
         <div class="form-group">
             <label for="image">Upload Image (optional)</label>
             <input type="file" id="image" name="image" accept="image/*">
+        </div>
+        <div class="form-group">
+            <label for="subject">Subject</label>
+            <select class="form-control" id="subject" name="subject" required>
+                <option value="">Select Subject</option>
+                {% for subject in subjects %}
+                <option value="{{ subject }}">{{ subject }}</option>
+                {% endfor %}
+            </select>
         </div>
         <button type="submit" class="btn">Submit Doubt</button>
     </form>

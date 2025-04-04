@@ -1,4 +1,3 @@
-<!-- <<<<<<< HEAD, -->
 {% extends "base.html" %}
 
 {% block title %}Dashboard{% endblock %}
@@ -16,18 +15,48 @@
         </div>
     </div>
 
+    <div class="dashboard-row">
+        <!-- Top Students Card -->
+        <div class="dashboard-card">
+            <div class="card-header">Top Students</div>
+            {% for student in top_students %}
+            <div class="ranking-item">
+                <span class="ranking-name">{{ student.name }}</span>
+                <span class="ranking-value">{{ student.doubts_posted }} doubts</span>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Top Teachers Card -->
+        <div class="dashboard-card">
+            <div class="card-header">Top Teachers & Seniors</div>
+            {% for teacher in top_teachers %}
+            <div class="ranking-item">
+                <span class="ranking-name">{{ teacher.name }}</span>
+                <span class="ranking-value">{{ teacher.points }} points</span>
+            </div>
+            {% endfor %}
+        </div>    
+    </div>
+
+    <!-- Subject-wise Doubts Section -->
     <div class="doubts-section">
-        <h3 class="section-title">Your Recent Doubts</h3>
-        {% if user_doubts %}
-            {% for doubt in user_doubts %}
-            <div class="doubt-card {% if doubt.solved %}solved{% endif %}">
-                <h4>{{ doubt.title }}</h4>
-                <p>{{ doubt.description }}</p>
-                {% if doubt.image_path %}
-                <img src="{{ url_for('static', filename='uploads/' + doubt.image_path) }}" alt="Doubt image">
-                {% endif %}
-                <p class="meta">Posted on {{ doubt.created_at.strftime('%Y-%m-%d %H:%M') }}</p>
-                <a href="{{ url_for('doubt_detail', doubt_id=doubt.id) }}" class="btn">View Details</a>
+        <h3 class="section-title">Your Doubts by Subject</h3>
+        {% if doubts_by_subject %}
+            {% for subject, doubts in doubts_by_subject.items() %}
+            <div class="subject-group" style="color: #5A2D6E; font-size: larger;">
+                <h4 class="subject-title">{{ subject }}</h4>
+                {% for doubt in doubts %}
+                <div class="doubt-card {% if doubt.solved %}solved{% endif %}">
+                    <h5>{{ doubt.title }}</h5>
+                    {% if doubt.image_path %}
+                    <img src="{{ url_for('static', filename='uploads/' + doubt.image_path) }}" alt="Doubt image" width="500px" height="500px">
+                    {% endif %}
+                    <p>{{ doubt.description|truncate(150) }}</p>
+                    <p class="meta">Posted on {{ doubt.created_at.strftime('%Y-%m-%d %H:%M') }}</p>
+                    <a href="{{ url_for('doubt_detail', doubt_id=doubt.id) }}" class="btn">View Details</a>
+                </div>
+                {% endfor %}
             </div>
             {% endfor %}
         {% else %}
@@ -35,18 +64,24 @@
         {% endif %}
     </div>
 
+    <!-- Solved Doubts Section -->
     <div class="solved-section">
-        <h3 class="section-title">Solved Doubts</h3>
-        {% if solved_doubts %}
-            {% for doubt in solved_doubts %}
-            <div class="doubt-card solved">
-                <h4>{{ doubt.title }}</h4>
-                <p>Solution: {{ doubt.solutions[0].text }}</p>
-                <p class="verified">
-                    <span>✅</span>
-                    Verified by {{ doubt.solutions[0].solved_by }} ({{ doubt.solutions[0].solver_role }})
-                </p>
-                <a href="{{ url_for('doubt_detail', doubt_id=doubt.id) }}" class="btn">View Details</a>
+        <h3 class="section-title">Recently Solved Doubts</h3>
+        {% if solved_by_subject %}
+            {% for subject, doubts in solved_by_subject.items() %}
+            <div class="subject-group">
+                <h4 class="subject-title">{{ subject }}</h4>
+                {% for doubt in doubts %}
+                <div class="doubt-card solved">
+                    <h5>{{ doubt.title }}</h5>
+                    <p>{{ doubt.solutions[0].text|truncate(150) }}</p>
+                    <p class="verified">
+                        <span>✅</span>
+                        Verified by {{ doubt.solutions[0].solved_by }} ({{ doubt.solutions[0].solver_role }})
+                    </p>
+                    <a href="{{ url_for('doubt_detail', doubt_id=doubt.id) }}" class="btn">View Details</a>
+                </div>
+                {% endfor %}
             </div>
             {% endfor %}
         {% else %}
@@ -54,5 +89,4 @@
         {% endif %}
     </div>
 </div>
-
 {% endblock %}

@@ -8,12 +8,12 @@ from openai import OpenAI
 from werkzeug.utils import secure_filename
 from functools import wraps
 from dotenv import load_dotenv
+from sqlalchemy import func
 
 load_dotenv()
 
 # Initialize Flask app
 app = Flask(__name__)
-
 
 # Configuration
 app.config['SECRET_KEY'] = os.getenv('FLASK_SECRET_KEY', 'default-secret-key-for-dev')
@@ -36,7 +36,7 @@ class User(db.Model):
     name = db.Column(db.String(100), nullable=False)
     email = db.Column(db.String(100), unique=True, nullable=False)
     password = db.Column(db.String(100), nullable=False)
-    role = db.Column(db.String(20), default='student')  # 'student' or 'teacher'
+    role = db.Column(db.String(20), default='student')  # 'student', 'teacher' or 'senior'
     points = db.Column(db.Integer, default=0)
     doubts_posted = db.Column(db.Integer, default=0)
     doubts = db.relationship('Doubt', backref='author', lazy=True)
@@ -57,6 +57,7 @@ class Doubt(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(200), nullable=False)
     description = db.Column(db.Text, nullable=False)
+    subject = db.Column(db.String(50), nullable=False)  # Added subject field
     image_path = db.Column(db.String(300))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
@@ -177,7 +178,7 @@ def login():
             session['user_id'] = user.id
             session['role'] = user.role
             
-            if user.role == 'teacher':
+            if user.role in ['teacher', 'senior']:
                 return redirect(url_for('teacher_dashboard'))
             else:
                 return redirect(url_for('dashboard'))
@@ -196,21 +197,47 @@ def logout():
 @app.route('/dashboard')
 @login_required
 def dashboard():
-    if session['role'] == 'teacher':
+    if session['role'] in ['teacher', 'senior']:
         return redirect(url_for('teacher_dashboard'))
     
     user = User.query.get(session['user_id'])
-    user_doubts = Doubt.query.filter_by(user_id=user.id).order_by(Doubt.created_at.desc()).all()
-    solved_doubts = Doubt.query.filter_by(user_id=user.id, solved=True).order_by(Doubt.created_at.desc()).all()
+    
+    # Get all subjects with doubts count
+    subjects = db.session.query(
+        Doubt.subject,
+        func.count(Doubt.id).label('doubt_count')
+    ).filter_by(user_id=user.id).group_by(Doubt.subject).all()
+    
+    # Get doubts grouped by subject
+    doubts_by_subject = {}
+    for subject, _ in subjects:
+        doubts = Doubt.query.filter_by(
+            user_id=user.id,
+            subject=subject
+        ).order_by(Doubt.created_at.desc()).all()
+        doubts_by_subject[subject] = doubts
+    
+    # Get solved doubts grouped by subject
+    solved_by_subject = {}
+    solved_doubts = Doubt.query.filter_by(
+        user_id=user.id,
+        solved=True
+    ).all()
+    
+    for doubt in solved_doubts:
+        if doubt.subject not in solved_by_subject:
+            solved_by_subject[doubt.subject] = []
+        solved_by_subject[doubt.subject].append(doubt)
     
     # Get ranking data
     top_students = User.query.filter_by(role='student').order_by(User.doubts_posted.desc()).limit(5).all()
-    top_teachers = User.query.filter_by(role='teacher').order_by(User.points.desc()).limit(5).all()
+    top_teachers = User.query.filter(User.role.in_(['teacher', 'senior'])).order_by(User.points.desc()).limit(5).all()
     
     return render_template('dashboard.html',
                          name=user.name,
-                         user_doubts=user_doubts,
-                         solved_doubts=solved_doubts,
+                         subjects=subjects,
+                         doubts_by_subject=doubts_by_subject,
+                         solved_by_subject=solved_by_subject,
                          top_students=top_students,
                          top_teachers=top_teachers)
 
@@ -220,6 +247,7 @@ def ask_doubt():
     if request.method == 'POST':
         title = request.form['title']
         description = request.form['description']
+        subject = request.form['subject']
         image = request.files.get('image')
         
         image_path = None
@@ -232,6 +260,7 @@ def ask_doubt():
         new_doubt = Doubt(
             title=title,
             description=description,
+            subject=subject,
             image_path=image_path,
             user_id=user.id
         )
@@ -243,7 +272,11 @@ def ask_doubt():
         flash('Your doubt has been posted!', 'success')
         return redirect(url_for('dashboard'))
     
-    return render_template('ask_doubt.html')
+    # List of available subjects
+    subjects = ['Algebra','Calculas','Physics', 'Chemistry', 'Biology','EDS','FOC',
+               'English', 'Electronics', 'Critical Thinking','EEE','Others']
+    
+    return render_template('ask_doubt.html', subjects=subjects)
 
 @app.route('/doubt/<int:doubt_id>')
 @login_required
@@ -306,12 +339,14 @@ def add_comment(doubt_id):
 
 # Teacher Routes
 @app.route('/teacher_dashboard')
-@role_required(['teacher'])
+@role_required(['teacher', 'senior'])
 def teacher_dashboard():
     teacher = User.query.get(session['user_id'])
+    
+    # Get all unsolved doubts (remove subject grouping)
     unsolved_doubts = Doubt.query.filter_by(solved=False).order_by(Doubt.created_at.desc()).all()
     
-    # Get recent comments on teacher's solutions
+    # Get recent comments
     teacher_solution_ids = [s.id for s in teacher.solutions]
     recent_comments = Comment.query.join(Doubt).filter(
         Doubt.solutions.any(Solution.id.in_(teacher_solution_ids))
@@ -319,17 +354,17 @@ def teacher_dashboard():
     
     # Get ranking data
     top_students = User.query.filter_by(role='student').order_by(User.doubts_posted.desc()).limit(5).all()
-    top_teachers = User.query.filter_by(role='teacher').order_by(User.points.desc()).limit(5).all()
+    top_teachers = User.query.filter(User.role.in_(['teacher', 'senior'])).order_by(User.points.desc()).limit(5).all()
     
     return render_template('teacher_dashboard.html',
-                         doubts=unsolved_doubts,
+                         unsolved_doubts=unsolved_doubts,
                          teacher=teacher,
                          recent_comments=recent_comments,
                          top_students=top_students,
                          top_teachers=top_teachers)
 
 @app.route('/solve/<int:doubt_id>', methods=['GET', 'POST'])
-@role_required(['teacher'])
+@role_required(['teacher', 'senior'])
 def solve_doubt(doubt_id):
     doubt = Doubt.query.get_or_404(doubt_id)
     teacher = User.query.get(session['user_id'])
@@ -363,7 +398,7 @@ def solve_doubt(doubt_id):
     return render_template('solve_doubt.html', doubt=doubt)
 
 @app.route('/redeem', methods=['GET', 'POST'])
-@role_required(['teacher'])
+@role_required(['teacher', 'senior'])
 def redeem_points():
     teacher = User.query.get(session['user_id'])
     
@@ -392,6 +427,37 @@ def redeem_points():
             flash('You need at least 100 points to redeem', 'error')
     
     return render_template('redeem.html', teacher=teacher)
+
+# Doubt Library Route
+@app.route('/doubt_library')
+@login_required
+def doubt_library():
+    # Get filter parameters
+    subject_filter = request.args.get('subject', '')
+    search_query = request.args.get('search', '')
+    
+    # Base query for solved doubts
+    query = Doubt.query.filter_by(solved=True)
+    
+    # Apply filters
+    if subject_filter:
+        query = query.filter_by(subject=subject_filter)
+    if search_query:
+        query = query.filter(Doubt.title.contains(search_query) | 
+                           Doubt.description.contains(search_query))
+    
+    # Get all solved doubts
+    solved_doubts = query.order_by(Doubt.created_at.desc()).all()
+    
+    # Get all distinct subjects for filter dropdown
+    subjects = db.session.query(Doubt.subject).distinct().all()
+    subjects = [s[0] for s in subjects]
+    
+    return render_template('doubt_library.html',
+                         solved_doubts=solved_doubts,
+                         subjects=subjects,
+                         current_subject=subject_filter,
+                         search_query=search_query)
 
 # Dobby AI Assistant
 @app.route('/dobby')
@@ -429,12 +495,15 @@ def test_openai():
         return f"Success! Response: {test.choices[0].message.content}"
     except Exception as e:
         return f"Failed: {str(e)}"
-    
-    
 
 # Initialize database
 with app.app_context():
     db.create_all()
+    # Add default subjects if none exist
+    if not Doubt.query.first():
+        default_subjects = ['Mathematics', 'Physics', 'Chemistry', 'Biology', 'Computer Science',
+                          'English', 'History', 'Geography', 'Economics', 'Business Studies']
+        # No need to add subjects directly as they'll be added via the form
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)

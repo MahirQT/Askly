@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#AA60C8">
     <title>{% block title %}Askly{% endblock %}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -26,12 +27,14 @@
 
     <nav>
         {% if 'email' in session %}
-            {% if session.role == 'teacher' %}
+            {% if session.role == 'teacher' or session.role == 'senior' %}
                 <a href="{{ url_for('teacher_dashboard') }}">Teacher Dashboard</a>
+                <a href="{{ url_for('doubt_library') }}">Doubt Library</a>
             {% else %}
                 <a href="{{ url_for('dashboard') }}">Dashboard</a>
                 <a href="{{ url_for('ask_doubt') }}">Ask Doubt</a>
                 <a href="{{ url_for('dobby') }}">Ask Dobby</a>
+                <a href="{{ url_for('doubt_library') }}">Doubt Library</a>
             {% endif %}
         {% endif %}
     </nav>
