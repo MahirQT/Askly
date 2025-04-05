@@ -41,7 +41,7 @@
 
     <!-- Subject-wise Doubts Section -->
     <div class="doubts-section">
-        <h3 class="section-title">Your Doubts by Subject</h3>
+        <h3 class="section-title" style=" font-size:40px; color:rgb(245, 90, 211);">Your Doubts by Subject</h3>
         {% if doubts_by_subject %}
             {% for subject, doubts in doubts_by_subject.items() %}
             <div class="subject-group" style="color: #5A2D6E; font-size: larger;">
@@ -66,7 +66,7 @@
 
     <!-- Solved Doubts Section -->
     <div class="solved-section">
-        <h3 class="section-title">Recently Solved Doubts</h3>
+        <h3 class="section-title" style="  color: #4CAF50; font-size: 40px;">Recently Solved Doubts</h3>
         {% if solved_by_subject %}
             {% for subject, doubts in solved_by_subject.items() %}
             <div class="subject-group">
