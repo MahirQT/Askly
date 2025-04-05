@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block title %}Student Community{% endblock %}
+
+{% block content %}
+<div class="community-container">
+    <h2 style="font-size: 50px; text-align: center; color: #8F4AA8;"><b>🌍 Student Community </b></h2> <br><br>
+    
+    <div class="community-sections">
+        <!-- Friend Requests Section -->
+        <div class="requests-section">
+            <h3 style="font-size: 30px;">  👥 Friend Requests</h3> <br>
+            {% if received_requests %}
+                {% for request in received_requests %}
+                <div class="request-card">
+                    <p>{{ request.sender.name }} wants to connect</p>
+                    <div class="request-actions">
+                        <a href="{{ url_for('respond_request', request_id=request.id, action='accept') }}" class="btn accept-btn">Accept</a>
+                        <a href="{{ url_for('respond_request', request_id=request.id, action='reject') }}" class="btn reject-btn">Reject</a>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <p class="empty-state">⛔ No pending requests</p>
+            {% endif %}
+        </div>
+        
+        <!-- All Students Section -->
+        <div class="students-section">
+            <h3 style="font-size: 30px;">🤝 Connect with Students</h3><br>
+                <div class="students-grid">
+                 {% for student in students %}
+                    <div class="student-card">
+                        <h4 style="font-size: 18px;">{{ student.name }}</h4>
+                        <p>{{ student.doubts_posted }} doubts posted</p>
+                        <form method="POST" action="{{ url_for('send_request', receiver_id=student.id) }}">
+                         <button type="submit" class="btn connect-btn">Connect</button>
+                        </form>
+                    </div>
+                 {% endfor %}
+            </div>
+        </div>
+        
+        <!-- Friends Section -->
+        <div class="friends-section">
+            <h3 style="font-size: 30px;"> 😎 Your Friends</h3><br>
+            {% if friends %}
+                <div class="friends-grid">
+                    {% for friend in friends %}
+                    <div class="friend-card">
+                        <h2 style=" color: #AA60C8;"> 😄 {{ friend.name }}</h2>
+                        <a href="{{ url_for('chat', friend_id=friend.id) }}" class="btn chat-btn">Chat</a>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="empty-state">You haven't added any friends yet</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

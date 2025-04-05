@@ -4,9 +4,33 @@
 {% block title %}Teacher Dashboard{% endblock %}
 
 {% block content %}
+
 <div class="teacher-dashboard">
+    <div class="dashboard-container">
+        <h2 style="color: #8F4AA8;"><span style="font-size: 40px;">👋</span>Welcome, {{ teacher.name }}</h2>
+        
+        <!-- Filter Section -->
+        <div class="filter-section">
+            <form method="GET" class="filter-form">
+                <div class="form-group">
+                    <input type="text" name="search" placeholder="Search doubts..." value="{{ search_query }}">
+                </div>
+                <div class="form-group">
+                    <select name="subject">
+                        <option value="">All Subjects</option>
+                        {% for subject in subjects %}
+                        <option value="{{ subject }}" {% if subject == current_subject %}selected{% endif %}>{{ subject }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <button type="submit" class="btn">Filter</button>
+                <a href="{{ url_for('teacher_dashboard') }}" class=" btn rst-btn ">Reset</a>
+            </form>
+        </div>
+    
+    <h2 class="section-title">🤔Unsolved Doubts</h2>    
     <!-- <h2>Unsolved Doubts</h2> -->
-    <h2 class="section-title">🤔Unsolved Doubts</h2>
+
     {% if unsolved_doubts %}
         {% for doubt in unsolved_doubts %}
         <div class="doubt-card">

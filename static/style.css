@@ -268,6 +268,25 @@
         transform: translateY(-2px);
         box-shadow: 0 4px 8px rgba(0,0,0,0.1);
     }
+
+    .logout-btn {
+        display: inline-block;
+        background-color: rgb(170, 96, 200);
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border: 2px white solid;
+        border-radius: 8px;
+        cursor: pointer;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s;
+    }
+    
+    .logout-btn:hover {
+        background-color: #8F4AA8;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
     
     .btn-group {
         display: flex;
@@ -458,6 +477,102 @@
         transform: translateY(-2px);
         box-shadow: 0 4px 8px rgba(0,0,0,0.2);
     }
+
+    /* Filter Styles */
+.filter-section {
+    background-color: #FFDFEF;
+    padding: 1.5rem;
+    border-radius: 12px;
+    margin-bottom: 2rem;
+}
+
+.filter-form {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    align-items: flex-end;
+}
+
+.form-group {
+    flex: 1;
+    min-width: 200px;
+}
+
+.filter-form input[type="text"],
+.filter-form select {
+    width: 100%;
+    padding: 0.75rem;
+    border: 2px solid #EABDE6;
+    border-radius: 8px;
+    font-size: 1rem;
+}
+
+.filter-form input[type="text"]:focus,
+.filter-form select:focus {
+    outline: none;
+    border-color: #AA60C8;
+}
+
+.filter-form .btn {
+    background-color: #AA60C8;
+    color: white;
+    border: none;
+    padding: 0.95rem 1.5rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s;
+    height: fit-content;
+}
+
+.filter-form .btn:hover {
+    background-color: #8F4AA8;
+    transform: translateY(-2px);
+}
+
+.rst-btn {
+    background-color: #AA60C8 !important;
+}
+
+.rst-btn:hover {
+    background-color: #C189C7 !important;
+}
+
+/* Subject Badge */
+.subject-badge {
+    background-color: #EABDE6;
+    color: #5A2D6E;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+/* Solve Button */
+.solve-btn {
+    background-color: #4CAF50;
+    margin-top: 0.5rem;
+}
+
+.solve-btn:hover {
+    background-color: #3e8e41;
+}
+
+/* Responsive Design  for filter section*/
+@media (max-width: 768px) {
+    .filter-form {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .form-group {
+        width: 100%;
+    }
+    
+    .filter-form .btn {
+        width: 100%;
+    }
+}
     
     /* Responsive Design */
     @media (max-width: 768px) {
@@ -509,12 +624,13 @@
         padding: 1.5rem;
     }
     
-    .chat-messages {
+    .dobby-chat-messages {
         height: 400px;
         overflow-y: auto;
         margin-bottom: 1rem;
         border: 1px solid #eee;
-        border-radius: 4px;
+        border-radius: 10px;
+        border: 2px solid #EABDE6;
         padding: 1rem;
     }
     
@@ -1279,4 +1395,183 @@
         box-shadow: 0 2px 6px rgba(0,0,0,0.1);
     }
     
+}
+
+/* Student Community Styles */
+.community-container {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 20px;
+}
+
+.community-sections {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 2rem;
+}
+
+.requests-section, .friends-section {
+    background-color: #FFDFEF;
+    padding: 1.5rem;
+    border-radius: 12px;
+}
+
+.students-section {
+    grid-column: span 2;
+}
+
+.request-card {
+    background: white;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.request-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.accept-btn {
+    background-color: #4CAF50;
+}
+
+.reject-btn {
+    background-color: #F44336;
+}
+
+.students-grid, .friends-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.student-card, .friend-card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    text-align: center;
+}
+
+.connect-btn {
+    background-color: #AA60C8;
+}
+
+.chat-btn {
+    background-color: #D69ADE;
+}
+
+/* Chat Styles */
+.chat-container {
+    max-width: 800px;
+    margin: 2rem auto;
+    padding: 0 20px;
+}
+
+.chat-messages {
+    height: 60vh;
+    overflow-y: auto;
+    margin-bottom: 1rem;
+    padding: 1rem;
+    background-color: #FFDFEF;
+    border-radius: 12px;
+}
+
+.message {
+    max-width: 70%;
+    padding: 0.75rem 1rem;
+    margin-bottom: 1rem;
+    border-radius: 18px;
+}
+
+.message.sent {
+    background-color: #EABDE6;
+    margin-left: auto;
+    border-bottom-right-radius: 4px;
+}
+
+.message.received {
+    background-color: white;
+    margin-right: auto;
+    border-bottom-left-radius: 4px;
+}
+
+.message small {
+    display: block;
+    text-align: right;
+    font-size: 0.75rem;
+    color: #666;
+    margin-top: 0.25rem;
+}
+
+.message-form {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.message-form textarea {
+    flex: 1;
+    padding: 0.75rem;
+    border: 2px solid #EABDE6;
+    border-radius: 8px;
+    min-height: 60px;
+    resize: none;
+}
+
+.send-btn {
+    background-color: #AA60C8;
+    align-self: flex-end;
+    height: fit-content;
+}
+
+/* Notification Styles */
+/* .notifications-container {
+    max-width: 800px;
+    margin: 2rem auto;
+    padding: 0 20px;
+}
+
+.notification-card {
+    background: white;
+    padding: 1.25rem;
+    margin-bottom: 1rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    position: relative;
+}
+
+.notification-card.unread {
+    border-left: 4px solid #AA60C8;
+}
+
+.clear-btn {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    font-size: 1.25rem;
+    color: #999;
+    text-decoration: none;
+}
+
+.view-btn {
+    background-color: #AA60C8;
+    margin-top: 0.5rem;
+} */
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .community-sections {
+        grid-template-columns: 2fr;
+    }
+    
+    .students-section {
+        grid-column: span 1;
+    }
+    
+    .message {
+        max-width: 85%;
+    }
 }

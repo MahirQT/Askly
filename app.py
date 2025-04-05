@@ -104,6 +104,43 @@ class Redemption(db.Model):
     points = db.Column(db.Integer, nullable=False)
     redeemed_at = db.Column(db.DateTime, default=datetime.utcnow)
 
+# friendrequest model
+class FriendRequest(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    sender_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    receiver_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    status = db.Column(db.String(20), default='pending')  # 'pending', 'accepted', 'rejected'
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    sender = db.relationship('User', foreign_keys=[sender_id], backref='sent_requests')
+    receiver = db.relationship('User', foreign_keys=[receiver_id], backref='received_requests')
+
+#Chat Message Model
+class ChatMessage(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    sender_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    receiver_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    message = db.Column(db.Text, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    read = db.Column(db.Boolean, default=False)
+    
+    sender = db.relationship('User', foreign_keys=[sender_id])
+    receiver = db.relationship('User', foreign_keys=[receiver_id])
+
+
+#Notification Model
+class Notification(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    content = db.Column(db.Text, nullable=False)
+    notification_type = db.Column(db.String(50))  # 'solution', 'comment', 'friend_request'
+    reference_id = db.Column(db.Integer)  # ID of related doubt/comment/etc
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    read = db.Column(db.Boolean, default=False)
+    
+    user = db.relationship('User', backref='notifications')
+
+
 # Helper Functions
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
@@ -343,8 +380,26 @@ def add_comment(doubt_id):
 def teacher_dashboard():
     teacher = User.query.get(session['user_id'])
     
-    # Get all unsolved doubts (remove subject grouping)
-    unsolved_doubts = Doubt.query.filter_by(solved=False).order_by(Doubt.created_at.desc()).all()
+    # Get filter parameters
+    subject_filter = request.args.get('subject', '')
+    search_query = request.args.get('search', '')
+    
+    # Base query for unsolved doubts
+    query = Doubt.query.filter_by(solved=False)
+    
+    # Apply filters
+    if subject_filter:
+        query = query.filter_by(subject=subject_filter)
+    if search_query:
+        query = query.filter(Doubt.title.contains(search_query) | 
+               Doubt.description.contains(search_query))
+    
+    # Get filtered doubts
+    unsolved_doubts = query.order_by(Doubt.created_at.desc()).all()
+    
+    # Get all distinct subjects for filter dropdown
+    subjects = db.session.query(Doubt.subject).distinct().all()
+    subjects = [s[0] for s in subjects]
     
     # Get recent comments
     teacher_solution_ids = [s.id for s in teacher.solutions]
@@ -358,6 +413,9 @@ def teacher_dashboard():
     
     return render_template('teacher_dashboard.html',
                          unsolved_doubts=unsolved_doubts,
+                         subjects=subjects,
+                         current_subject=subject_filter,
+                         search_query=search_query,
                          teacher=teacher,
                          recent_comments=recent_comments,
                          top_students=top_students,
@@ -458,6 +516,203 @@ def doubt_library():
                          subjects=subjects,
                          current_subject=subject_filter,
                          search_query=search_query)
+
+# Student Community Routes
+@app.route('/student_community')
+@login_required
+def student_community():
+    current_user = User.query.get(session['user_id'])
+    # Get all students except current user
+    students = User.query.filter(User.role == 'student', User.id != current_user.id).all()
+    
+    # Get friend requests
+    received_requests = FriendRequest.query.filter_by(receiver_id=current_user.id, status='pending').all()
+    sent_requests = FriendRequest.query.filter_by(sender_id=current_user.id).all()
+    
+    # Get friends (accepted requests)
+    friends = []
+    accepted_sent = FriendRequest.query.filter_by(sender_id=current_user.id, status='accepted').all()
+    accepted_received = FriendRequest.query.filter_by(receiver_id=current_user.id, status='accepted').all()
+    
+    for req in accepted_sent:
+        friends.append(req.receiver)
+    for req in accepted_received:
+        friends.append(req.sender)
+    
+    return render_template('student_community.html',
+                         students=students,
+                         received_requests=received_requests,
+                         sent_requests=sent_requests,
+                         friends=friends)
+
+@app.route('/send_request/<int:receiver_id>', methods=['POST'])
+@login_required
+def send_request(receiver_id):
+    sender_id = session['user_id']
+    
+    # Check if request already exists
+    existing = FriendRequest.query.filter_by(sender_id=sender_id, receiver_id=receiver_id).first()
+    if existing:
+        flash('Request already sent', 'info')
+        return redirect(url_for('student_community'))
+    
+    # Create new request
+    request = FriendRequest(sender_id=sender_id, receiver_id=receiver_id)
+    db.session.add(request)
+    
+    # Create notification
+    sender = User.query.get(sender_id)
+    notification = Notification(
+        user_id=receiver_id,
+        content=f"{sender.name} sent you a friend request",
+        notification_type='friend_request',
+        reference_id=request.id
+    )
+    db.session.add(notification)
+    
+    db.session.commit()
+    flash('Friend request sent', 'success')
+    return redirect(url_for('student_community'))
+
+@app.route('/respond_request/<int:request_id>/<action>')
+@login_required
+def respond_request(request_id, action):
+    request = FriendRequest.query.get_or_404(request_id)
+    
+    if request.receiver_id != session['user_id']:
+        flash('Unauthorized', 'error')
+        return redirect(url_for('student_community'))
+    
+    if action == 'accept':
+        request.status = 'accepted'
+        # Create notification for sender
+        receiver = User.query.get(session['user_id'])
+        notification = Notification(
+            user_id=request.sender_id,
+            content=f"{receiver.name} accepted your friend request",
+            notification_type='friend_request',
+            reference_id=request.id
+        )
+        db.session.add(notification)
+        flash('Request accepted', 'success')
+    else:
+        request.status = 'rejected'
+        flash('Request rejected', 'info')
+    
+    db.session.commit()
+    return redirect(url_for('student_community'))
+
+@app.route('/chat/<int:friend_id>')
+@login_required
+def chat(friend_id):
+    # Verify friendship
+    friendship1 = FriendRequest.query.filter_by(
+        sender_id=session['user_id'],
+        receiver_id=friend_id,
+        status='accepted'
+    ).first()
+    
+    friendship2 = FriendRequest.query.filter_by(
+        sender_id=friend_id,
+        receiver_id=session['user_id'],
+        status='accepted'
+    ).first()
+    
+    if not friendship1 and not friendship2:
+        flash('You can only chat with friends', 'error')
+        return redirect(url_for('student_community'))
+    
+    friend = User.query.get_or_404(friend_id)
+    messages = ChatMessage.query.filter(
+        ((ChatMessage.sender_id == session['user_id']) & (ChatMessage.receiver_id == friend_id)) |
+        ((ChatMessage.sender_id == friend_id) & (ChatMessage.receiver_id == session['user_id']))
+    ).order_by(ChatMessage.created_at).all()
+    
+    return render_template('chat.html', friend=friend, messages=messages)
+
+@app.route('/send_message/<int:receiver_id>', methods=['POST'])
+@login_required
+def send_message(receiver_id):
+    message = request.form.get('message')
+    if not message:
+        flash('Message cannot be empty', 'error')
+        return redirect(url_for('chat', friend_id=receiver_id))
+    
+    new_message = ChatMessage(
+        sender_id=session['user_id'],
+        receiver_id=receiver_id,
+        message=message
+    )
+    db.session.add(new_message)
+    
+    # Create notification
+    sender = User.query.get(session['user_id'])
+    notification = Notification(
+        user_id=receiver_id,
+        content=f"New message from {sender.name}",
+        notification_type='message',
+        reference_id=new_message.id
+    )
+    db.session.add(notification)
+    
+    db.session.commit()
+    return redirect(url_for('chat', friend_id=receiver_id))
+
+# Notification Routes
+@app.route('/notifications')
+@login_required
+def notifications():
+    user_notifications = Notification.query.filter_by(
+        user_id=session['user_id']
+    ).order_by(Notification.created_at.desc()).all()
+    
+    # Mark as read when viewed
+    for notification in user_notifications:
+        if not notification.read:
+            notification.read = True
+    db.session.commit()
+    
+    return render_template('notifications.html', notifications=user_notifications)
+
+@app.route('/clear_notification/<int:notification_id>')
+@login_required
+def clear_notification(notification_id):
+    notification = Notification.query.get_or_404(notification_id)
+    if notification.user_id != session['user_id']:
+        flash('Unauthorized', 'error')
+        return redirect(url_for('notifications'))
+    
+    db.session.delete(notification)
+    db.session.commit()
+    return redirect(url_for('notifications'))
+
+# Add these to existing routes
+def create_solution_notification(doubt, solution):
+    notification = Notification(
+        user_id=doubt.user_id,
+        content=f"Your doubt '{doubt.title}' has been solved by {solution.solved_by}",
+        notification_type='solution',
+        reference_id=doubt.id
+    )
+    db.session.add(notification)
+
+def create_comment_notification(doubt, comment):
+    # Notify doubt author and other commenters
+    users_to_notify = {doubt.user_id}
+    
+    # Get other users who commented
+    other_commenters = {c.user_id for c in doubt.comments if c.user_id != comment.user_id}
+    users_to_notify.update(other_commenters)
+    
+    for user_id in users_to_notify:
+        if user_id != comment.user_id:  # Don't notify yourself
+            notification = Notification(
+                user_id=user_id,
+                content=f"New comment on your doubt '{doubt.title}'",
+                notification_type='comment',
+                reference_id=doubt.id
+            )
+            db.session.add(notification)
 
 # Dobby AI Assistant
 @app.route('/dobby')
