@@ -7,7 +7,7 @@
 
 <div class="teacher-dashboard">
     <div class="dashboard-container">
-        <h2 style="color: #8F4AA8;"><span style="font-size: 40px;">👋</span>Welcome, {{ teacher.name }}</h2>
+        <h2 style="color: #006A71;"><span style="font-size: 40px;">👋</span>Welcome, {{ teacher.name }}</h2>
         
         <!-- Filter Section -->
         <div class="filter-section">
@@ -86,10 +86,5 @@
         </div>
     </div>
 
-    <div class="text-center">
-        <a href="{{ url_for('redeem_points') }}" class="redeem-btn">
-            Redeem Your Points ({{ teacher.points }} available)
-        </a>
-    </div>
 </div>
 {% endblock %}

@@ -10,13 +10,15 @@ from functools import wraps
 from dotenv import load_dotenv
 from sqlalchemy import func
 
+# called environment variables from .env file
 load_dotenv()
 
 # Initialize Flask app
 app = Flask(__name__)
 
+##openai api key is called from .env file
 # Configuration
-app.config['SECRET_KEY'] = os.getenv('FLASK_SECRET_KEY', 'default-secret-key-for-dev')
+app.config['SECRET_KEY'] = os.getenv('FLASK_SECRET_KEY', 'default-secret-key-for-dev') 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['UPLOAD_FOLDER'] = 'static/uploads'
@@ -31,6 +33,7 @@ client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
 # Database Models
+# User information model
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
@@ -53,6 +56,7 @@ class User(db.Model):
     def check_password(self, password):
         return bcrypt.checkpw(password.encode('utf-8'), self.password.encode('utf-8'))
 
+# Doubt model
 class Doubt(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(200), nullable=False)
@@ -65,6 +69,7 @@ class Doubt(db.Model):
     solutions = db.relationship('Solution', backref='doubt', lazy=True)
     comments = db.relationship('Comment', backref='doubt', lazy=True)
 
+# solution model
 class Solution(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     text = db.Column(db.Text, nullable=False)
@@ -76,6 +81,7 @@ class Solution(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     votes = db.relationship('Vote', backref='solution', lazy=True)
 
+    #property to get the number of upvotes and downvotes
     @property
     def upvotes(self):
         return Vote.query.filter_by(solution_id=self.id, is_upvote=True).count()
@@ -84,12 +90,14 @@ class Solution(db.Model):
     def downvotes(self):
         return Vote.query.filter_by(solution_id=self.id, is_upvote=False).count()
 
+#class to handle votes
 class Vote(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     is_upvote = db.Column(db.Boolean, nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     solution_id = db.Column(db.Integer, db.ForeignKey('solution.id'), nullable=False)
 
+#class to handle comments
 class Comment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     text = db.Column(db.Text, nullable=False)
@@ -97,14 +105,9 @@ class Comment(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     doubt_id = db.Column(db.Integer, db.ForeignKey('doubt.id'), nullable=False)
 
-class Redemption(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    code = db.Column(db.String(50), unique=True, nullable=False)
-    points = db.Column(db.Integer, nullable=False)
-    redeemed_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-# friendrequest model
+
+# class to handle friend requests
 class FriendRequest(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     sender_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
@@ -115,7 +118,7 @@ class FriendRequest(db.Model):
     sender = db.relationship('User', foreign_keys=[sender_id], backref='sent_requests')
     receiver = db.relationship('User', foreign_keys=[receiver_id], backref='received_requests')
 
-#Chat Message Model
+#class to handle friend requests
 class ChatMessage(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     sender_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
@@ -128,7 +131,7 @@ class ChatMessage(db.Model):
     receiver = db.relationship('User', foreign_keys=[receiver_id])
 
 
-#Notification Model
+# #Notification Model
 class Notification(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
@@ -141,7 +144,7 @@ class Notification(db.Model):
     user = db.relationship('User', backref='notifications')
 
 
-# Helper Functions
+#function to check if the file is allowed
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
 
@@ -169,11 +172,12 @@ def role_required(roles):
         return decorated_function
     return decorator
 
-# Routes
+# main route
 @app.route('/')
 def home():
     return redirect(url_for('login'))
 
+#route for the registration page
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
@@ -201,6 +205,7 @@ def register():
 
     return render_template('register.html')
 
+#route for the login page
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -224,6 +229,7 @@ def login():
 
     return render_template('login.html')
 
+#route for the logout page
 @app.route('/logout')
 def logout():
     session.clear()
@@ -278,6 +284,7 @@ def dashboard():
                          top_students=top_students,
                          top_teachers=top_teachers)
 
+#route for the ask doubt page
 @app.route('/ask', methods=['GET', 'POST'])
 @login_required
 def ask_doubt():
@@ -315,6 +322,7 @@ def ask_doubt():
     
     return render_template('ask_doubt.html', subjects=subjects)
 
+#route for the view doubt page
 @app.route('/doubt/<int:doubt_id>')
 @login_required
 def doubt_detail(doubt_id):
@@ -356,6 +364,7 @@ def vote(solution_id, vote_type):
     db.session.commit()
     return redirect(url_for('doubt_detail', doubt_id=solution.doubt_id))
 
+#route for the add comment page
 @app.route('/comment/<int:doubt_id>', methods=['POST'])
 @login_required
 def add_comment(doubt_id):
@@ -374,7 +383,7 @@ def add_comment(doubt_id):
     
     return redirect(url_for('doubt_detail', doubt_id=doubt_id))
 
-# Teacher Routes
+# teacher dashboard route
 @app.route('/teacher_dashboard')
 @role_required(['teacher', 'senior'])
 def teacher_dashboard():
@@ -421,6 +430,7 @@ def teacher_dashboard():
                          top_students=top_students,
                          top_teachers=top_teachers)
 
+#route for the solve doubt page
 @app.route('/solve/<int:doubt_id>', methods=['GET', 'POST'])
 @role_required(['teacher', 'senior'])
 def solve_doubt(doubt_id):
@@ -455,68 +465,6 @@ def solve_doubt(doubt_id):
     
     return render_template('solve_doubt.html', doubt=doubt)
 
-@app.route('/redeem', methods=['GET', 'POST'])
-@role_required(['teacher', 'senior'])
-def redeem_points():
-    teacher = User.query.get(session['user_id'])
-    
-    if request.method == 'POST':
-        points_to_redeem = min(teacher.points, int(request.form['points']))
-        if points_to_redeem >= 100:  # Minimum redemption threshold
-            # Generate unique redemption code
-            redemption_code = f"VOUCHER-{datetime.now().strftime('%Y%m%d')}-{teacher.id}-{secrets.token_hex(4).upper()}"
-            
-            # Create redemption record
-            redemption = Redemption(
-                user_id=teacher.id,
-                code=redemption_code,
-                points=points_to_redeem
-            )
-            
-            # Update teacher points
-            teacher.points -= points_to_redeem
-            
-            db.session.add(redemption)
-            db.session.commit()
-            
-            flash(f'Success! Your voucher code: {redemption_code}', 'success')
-            return redirect(url_for('teacher_dashboard'))
-        else:
-            flash('You need at least 100 points to redeem', 'error')
-    
-    return render_template('redeem.html', teacher=teacher)
-
-# Doubt Library Route
-@app.route('/doubt_library')
-@login_required
-def doubt_library():
-    # Get filter parameters
-    subject_filter = request.args.get('subject', '')
-    search_query = request.args.get('search', '')
-    
-    # Base query for solved doubts
-    query = Doubt.query.filter_by(solved=True)
-    
-    # Apply filters
-    if subject_filter:
-        query = query.filter_by(subject=subject_filter)
-    if search_query:
-        query = query.filter(Doubt.title.contains(search_query) | 
-                           Doubt.description.contains(search_query))
-    
-    # Get all solved doubts
-    solved_doubts = query.order_by(Doubt.created_at.desc()).all()
-    
-    # Get all distinct subjects for filter dropdown
-    subjects = db.session.query(Doubt.subject).distinct().all()
-    subjects = [s[0] for s in subjects]
-    
-    return render_template('doubt_library.html',
-                         solved_doubts=solved_doubts,
-                         subjects=subjects,
-                         current_subject=subject_filter,
-                         search_query=search_query)
-
 # Student Community Routes
 @app.route('/student_community')
 @login_required
@@ -545,6 +493,7 @@ def student_community():
                          sent_requests=sent_requests,
                          friends=friends)
 
+# Send Friend Request Route
 @app.route('/send_request/<int:receiver_id>', methods=['POST'])
 @login_required
 def send_request(receiver_id):
@@ -657,62 +606,6 @@ def send_message(receiver_id):
     
     db.session.commit()
     return redirect(url_for('chat', friend_id=receiver_id))
-
-# Notification Routes
-@app.route('/notifications')
-@login_required
-def notifications():
-    user_notifications = Notification.query.filter_by(
-        user_id=session['user_id']
-    ).order_by(Notification.created_at.desc()).all()
-    
-    # Mark as read when viewed
-    for notification in user_notifications:
-        if not notification.read:
-            notification.read = True
-    db.session.commit()
-    
-    return render_template('notifications.html', notifications=user_notifications)
-
-@app.route('/clear_notification/<int:notification_id>')
-@login_required
-def clear_notification(notification_id):
-    notification = Notification.query.get_or_404(notification_id)
-    if notification.user_id != session['user_id']:
-        flash('Unauthorized', 'error')
-        return redirect(url_for('notifications'))
-    
-    db.session.delete(notification)
-    db.session.commit()
-    return redirect(url_for('notifications'))
-
-# Add these to existing routes
-def create_solution_notification(doubt, solution):
-    notification = Notification(
-        user_id=doubt.user_id,
-        content=f"Your doubt '{doubt.title}' has been solved by {solution.solved_by}",
-        notification_type='solution',
-        reference_id=doubt.id
-    )
-    db.session.add(notification)
-
-def create_comment_notification(doubt, comment):
-    # Notify doubt author and other commenters
-    users_to_notify = {doubt.user_id}
-    
-    # Get other users who commented
-    other_commenters = {c.user_id for c in doubt.comments if c.user_id != comment.user_id}
-    users_to_notify.update(other_commenters)
-    
-    for user_id in users_to_notify:
-        if user_id != comment.user_id:  # Don't notify yourself
-            notification = Notification(
-                user_id=user_id,
-                content=f"New comment on your doubt '{doubt.title}'",
-                notification_type='comment',
-                reference_id=doubt.id
-            )
-            db.session.add(notification)
 
 # Dobby AI Assistant
 @app.route('/dobby')

@@ -4,7 +4,7 @@
 
 {% block content %}
 <div class="community-container">
-    <h2 style="font-size: 50px; text-align: center; color: #8F4AA8;"><b>🌍 Student Community </b></h2> <br><br>
+    <h2 style="font-size: 50px; text-align: center; color: #006A71;"><b>🌍 Student Community </b></h2> <br><br>
     
     <div class="community-sections">
         <!-- Friend Requests Section -->
@@ -48,7 +48,7 @@
                 <div class="friends-grid">
                     {% for friend in friends %}
                     <div class="friend-card">
-                        <h2 style=" color: #AA60C8;"> 😄 {{ friend.name }}</h2>
+                        <h2 style=" color: #006A71;"> 😄 {{ friend.name }}</h2>
                         <a href="{{ url_for('chat', friend_id=friend.id) }}" class="btn chat-btn">Chat</a>
                     </div>
                     {% endfor %}

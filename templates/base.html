@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="website icon" type="png" href="{{url_for('static', filename= 'only logo.png')}}">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Jost:ital,wght@0,100..900;1,100..900&family=Lilita+One&family=Montserrat:ital,wght@0,100..900;1,100..900&family=Playfair+Display+SC:ital,wght@0,400;0,700;0,900;1,400;1,700;1,900&family=Roboto:ital,wght@0,100..900;1,100..900&family=Rowdies:wght@300;400;700&family=Varela+Round&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Jost:ital,wght@0,100..900;1,100..900&family=Lilita+One&family=Montserrat:ital,wght@0,100..900;1,100..900&family=National+Park:wght@200..800&family=Playfair+Display+SC:ital,wght@0,400;0,700;0,900;1,400;1,700;1,900&family=Roboto:ital,wght@0,100..900;1,100..900&family=Rowdies:wght@300;400;700&family=Varela+Round&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
@@ -32,12 +32,10 @@
         {% if 'email' in session %}
             {% if session.role == 'teacher' or session.role == 'senior' %}
                 <a href="{{ url_for('teacher_dashboard') }}">Teacher Dashboard</a>
-                <a href="{{ url_for('doubt_library') }}">Doubt Library</a>
             {% else %}
                 <a href="{{ url_for('dashboard') }}">Dashboard</a>
                 <a href="{{ url_for('ask_doubt') }}">Ask Doubt</a>
                 <a href="{{ url_for('dobby') }}">Ask Dobby</a>
-                <a href="{{ url_for('doubt_library') }}">Doubt Library</a>
                 <a href="{{ url_for('student_community') }}">Your Friends</a>
             {% endif %}
         {% endif %}
