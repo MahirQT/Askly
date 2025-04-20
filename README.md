@@ -16,7 +16,7 @@ A smart and intuitive doubt-solving platform where students can ask questions, u
 🌐 Frontend: Postman (for testing), HTML/CSS (if UI is added)
 <br>
 
-<b>🎯 Features:</b><br>
+<b>🎯 Features:</b><br><br>
 📤 Post doubts via text or image
 
 💬 Smart responses using AI
