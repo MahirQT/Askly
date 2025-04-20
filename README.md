@@ -1,12 +1,12 @@
 ﻿# Askly-doubt-solving-platform
 
 
-<b>🔍 Doubt Solving Platform</b>
+<b>🔍 Doubt Solving Platform</b> <br>
 <b>🚀 "No Student Left Confused!"</b>
 
 A smart and intuitive doubt-solving platform where students can ask questions, upload images, or share code — and get answers fast through an AI and community-powered system.
 
-<b>🔧 Tech Stack:</b>
+<b>🔧 Tech Stack:</b> <br>
 ⚙️ Backend: Python, Flask
 
 🧠 AI/Logic: NLP-based message parsing
@@ -14,8 +14,9 @@ A smart and intuitive doubt-solving platform where students can ask questions, u
 💾 Database: SQLite / MongoDB (optional)
 
 🌐 Frontend: Postman (for testing), HTML/CSS (if UI is added)
+<br>
 
-<b>🎯 Features:</b>
+<b>🎯 Features:</b><br>
 📤 Post doubts via text or image
 
 💬 Smart responses using AI
