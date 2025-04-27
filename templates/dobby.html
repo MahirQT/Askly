@@ -34,7 +34,10 @@ document.addEventListener('DOMContentLoaded', function() {
     function addMessage(sender, message) {
         const messageDiv = document.createElement('div');
         messageDiv.className = `message ${sender}`;
-        messageDiv.innerHTML = `
+        
+        // instead of using innerHTML and injecting HTML directly we used textContent to avoid xss
+        
+        messageDiv.textContent = `
             <div class="message-sender">${sender === 'user' ? 'You' : 'Dobby'}</div>
             <div class="message-content">${message}</div>
         `;
@@ -48,7 +51,9 @@ document.addEventListener('DOMContentLoaded', function() {
         
         addMessage('user', message);
         userInput.value = '';
-        
+
+
+        // also try hiding the api route it could be dos'ed ig
         try {
             const response = await fetch('/ask_dobby', {
                 method: 'POST',
@@ -76,6 +81,8 @@ document.addEventListener('DOMContentLoaded', function() {
             sendBtn.click();
         }
     });
+
+    console.log("xss bug was fixed. (https://github.com/arpitbhau)")
 });
 </script>
 <!-- ======= -->
