@@ -30,14 +30,28 @@ document.addEventListener('DOMContentLoaded', function() {
     const chatMessages = document.getElementById('chat-messages');
     const userInput = document.getElementById('user-message');
     const sendBtn = document.getElementById('send-btn');
+
+
+    // xss filtering
+    function xssFilter(sender , mess) {
+
+        // cif sender then purify using regex else returns undefined at the below line not setting undefined in message
+        sender === "user" && ( mess = mess.replace(/<[^>]+>/g, ""))
+
+
+        // finally returning message 
+        return mess
+    }
     
     function addMessage(sender, message) {
         const messageDiv = document.createElement('div');
         messageDiv.className = `message ${sender}`;
         
-        // instead of using innerHTML and injecting HTML directly we used textContent to avoid xss
+        // filtering message sent by user
+
+        message = xssFilter(sender , message)
         
-        messageDiv.textContent = `
+        messageDiv.innerHTML = `
             <div class="message-sender">${sender === 'user' ? 'You' : 'Dobby'}</div>
             <div class="message-content">${message}</div>
         `;
