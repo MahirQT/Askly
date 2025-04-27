@@ -633,16 +633,7 @@ def ask_dobby():
     except Exception as e:
         return jsonify({'response': str(e), 'status': 'error'}), 500
     
-@app.route('/test_openai')
-def test_openai():
-    try:
-        test = client.chat.completions.create(
-            model="gpt-3.5-turbo",
-            messages=[{"role": "user", "content": "Say 'test successful'"}]
-        )
-        return f"Success! Response: {test.choices[0].message.content}"
-    except Exception as e:
-        return f"Failed: {str(e)}"
+
 
 # Initialize database
 with app.app_context():
