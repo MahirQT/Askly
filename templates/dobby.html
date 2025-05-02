@@ -38,7 +38,8 @@ document.addEventListener('DOMContentLoaded', function() {
         // instead of using innerHTML and injecting HTML directly we used textContent to avoid xss
         
         messageDiv.textContent = `
-            // ${sender === 'user' ? 'You' : 'Dobby'}
+             ${sender === 'user' ? 'You' : 'Dobby'} ${"\n"}
+             
             ${message}
         `;
         chatMessages.appendChild(messageDiv);
